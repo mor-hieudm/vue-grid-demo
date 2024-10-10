@@ -1,18 +1,14 @@
 <template>
   <div id="app">
-    <img
-      alt="Vue logo"
-      src="./assets/logo.png"
-    />
-    <HelloWorld msg="Hello Vue 2 + Vite" />
+    <GridBroad />
   </div>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
+import GridBroad from "./components/GridBroad.vue";
 export default {
   components: {
-    HelloWorld,
+    GridBroad,
   },
 };
 </script>
