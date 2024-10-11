@@ -12,7 +12,7 @@
         <span class="text">バリューチェーン</span>
       </grid-item>
 
-      <grid-item v-for="item in getColumnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
+      <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :maxH="2" :minH="2" :i="item.i" :isDraggable="item.isDraggable" class="column-header"
         @resize="columnHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
@@ -63,8 +63,16 @@ export default {
       ],
       draggable: true,
       resizable: true,
-      index: 0
+      index: 0,
+      refreshKey: true,
     };
+  },
+  created() {
+    const headerW = (this.totalCol - this.totalCol % this.columnHeader.length) / this.columnHeader.length;
+    const headerX = (index) => this.blankGridItem.w + headerW * index
+    const columnHeaderGrid = this.columnHeader.map((item, index) => ({ ...item, 'i': index, 'x': headerX(index), 'y': 1, 'w': headerW, 'h': 2 }))
+    columnHeaderGrid[this.columnHeader.length - 1].w += this.totalCol % this.columnHeader.length;
+    this.columnHeader = columnHeaderGrid
   },
   computed: {
     getMaxWidth() {
@@ -73,22 +81,15 @@ export default {
         1,
       );
     },
-    getColumnHeader() {
-      const headerW = (this.totalCol - this.totalCol % this.columnHeader.length) / this.columnHeader.length;
-      const headerX = (index) => this.blankGridItem.w + headerW * index
-      const columnHeaderGrid = this.columnHeader.map((item, index) => ({ ...item, 'i': index, 'x': headerX(index), 'y': 1, 'w': headerW, 'h': 2 }))
-      columnHeaderGrid[this.columnHeader.length - 1].w += this.totalCol % this.columnHeader.length;
-      return columnHeaderGrid
-    },
     getLayout() {
-      return [...this.getColumnHeader, ...this.rowHeader, ...this.data]
+      return [...this.columnHeader, ...this.rowHeader, ...this.data]
     },
   },
   methods: {
     columnHeaderResizeEvent: function (i, newH, newW) {
       let resizeElement = false
       let amountOfGridChange = 0;
-      this.getColumnHeader.forEach((header) => {
+      this.columnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
         }
