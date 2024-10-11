@@ -4,7 +4,7 @@
       :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
       :use-css-transforms="true" :margin="[0,0]">
       <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :i="item.i" :isDraggable="item.isDraggable" class="column">
+        :i="item.i" :isDraggable="item.isDraggable" class="column" @resize="horizontalHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
       <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
@@ -66,49 +66,32 @@ export default {
     }
   },
   methods: {
-    itemTitle(item) {
-      let result = item.i;
-      if (item.static) {
-        result += " - Static";
-      }
-      return result;
-    }
+    horizontalHeaderResizeEvent: function (i, newH, newW, newHPx, newWPx) {
+      let resizeElement = false
+      let amountOfGridChange = 0;
+      this.horizontalHeader.forEach((header, index) => {
+        if (resizeElement) {
+          header.x -= amountOfGridChange
+        }
+        if (header.i === i) {
+          amountOfGridChange = header.w - newW
+          resizeElement = true
+        }
+
+      });
+    },
   }
 };
 </script>
 
 <style scoped>
-.grid::before {
-  content: '';
-  background-size: calc(calc(100% - 5px) / 12) 40px;
-  background-image: linear-gradient(
-      to right,
-      lightgrey 1px,
-      transparent 1px
-  ),
-  linear-gradient(to bottom, lightgrey 1px, transparent 1px);
-  height: calc(100% - 5px);
-  width: calc(100% - 5px);
-  /*height: 100%;*/
-  /*width: 100%;*/
-  position: absolute;
-  background-repeat: repeat;
-  margin:5px;
-}
-.column::before {
-  content: '';
-  position: absolute;
-  border-bottom: 1px solid black;
-  right: 0;
-}
-
 .vue-grid-layout {
   background: #eee;
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
   background: #ccc;
-  border: 1px solid black;
+  border: 1px solid #DCDCDC;
 }
 
 .vue-grid-item .resizing {
@@ -120,16 +103,9 @@ export default {
 }
 
 .vue-grid-item .text {
-  font-size: 24px;
-  text-align: center;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-  height: 100%;
-  width: 100%;
+  font-size: 16px;
+  display: flex;
+  margin: 4px;
 }
 
 .vue-grid-item .no-drag {
