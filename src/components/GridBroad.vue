@@ -69,7 +69,7 @@ export default {
     horizontalHeaderResizeEvent: function (i, newH, newW, newHPx, newWPx) {
       let resizeElement = false
       let amountOfGridChange = 0;
-      this.horizontalHeader.forEach((header, index) => {
+      this.columnHeader.forEach((header, index) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
         }
