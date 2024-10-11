@@ -49,42 +49,10 @@ export default {
       data: [
         { "x": 3, "y": 6, "w": 1, "h": 2, "i": "10", static: false, element: { label: 'Hehe' },isDraggable: true, column: [], row: [] },
       ],
-      horizontalHeader: [
-        { id: 1, label: '事業企画・営業企画', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 2, label: 'フロント営業', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 3, label: "導入コンサル・プリセールス", position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 4, label: 'PM', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 5, lable: '構築・プロビ', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } }
-      ],
-      verticalHeader: [
-        { id: 1, label: '探索領域' },
-        { id: 2, label: 'モビリティ' },
-        { id: 3, label: '物流' }
-      ],
       draggable: true,
       resizable: true,
       index: 0
     };
-  },
-  watch: {
-    data: {
-
-    },
-    columnHeader: {
-      handler() {
-        let firstWidth = this.columnHeader[0].w
-        let firstX = this.columnHeader[0].x
-        this.columnHeader = this.columnHeader.map((data, index) => {
-          if(index > 0) {
-            data.x = firstX + firstWidth
-            firstX = data.w
-            firstWidth = data.x
-          }
-          return data
-        })
-      },
-      deep: true,
-    },
   },
   computed: {
     getMaxWidth() {
