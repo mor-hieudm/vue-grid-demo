@@ -1,10 +1,9 @@
 <template>
-  <div class="g">
-    <grid-layout :layout.sync="layout" :col-num="12" :row-height="30" :is-draggable="draggable"
-      :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
-      :use-css-transforms="true">
-      <grid-item v-for="item in layout" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :i="item.i">
+  <div>
+    <grid-layout :layout.sync="horizontalHeader" :col-num="12" :row-height="30" :isDraggable="false" :margin="[0, 0]"
+      :maxRows="3">
+      <grid-item v-for="item in horizontalHeader" :isResizable="true" :static="item.static" :x="item.x" :y="item.y"
+        :w="item.w" :h="item.h" :i="item.i" @resize="horizontalHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
     </grid-layout>
@@ -24,41 +23,38 @@ export default {
   data() {
     return {
       count: 0,
-      layout: [
-        { "x": 1, "y": 0, "w": 2, "h": 2, "i": "0", static: false, element: { label: '事業企画・営業企画' } },
-        { "x": 3, "y": 0, "w": 2, "h": 2, "i": "1", static: false, element: { label: 'フロント営業' } },
-        { "x": 5, "y": 0, "w": 2, "h": 2, "i": "2", static: false, element: { label: '導入コンサル・プリセールス' } },
-        { "x": 7, "y": 0, "w": 2, "h": 2, "i": "3", static: false, element: { label: 'PM' } },
-        { "x": 9, "y": 0, "w": 2, "h": 2, "i": "4", static: false, element: { label: '構築・プロビ' } },
-        { "x": 0, "y": 1, "w": 2, "h": 2, "i": "5", static: false, element: { label: '探索領域' } },
-        { "x": 0, "y": 3, "w": 1, "h": 2, "i": "6", static: false, element: { label: 'モビリティ' } },
-        { "x": 0, "y": 5, "w": 1, "h": 2, "i": "7", static: false, element: { label: '物流' } },
-      ],
       horizontalHeader: [
-        { id: 1, label: '事業企画・営業企画', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 2, label: 'フロント営業', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 3, label: "導入コンサル・プリセールス", position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 4, label: 'PM', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } },
-        { id: 5, lable: '構築・プロビ', position: { "x": 0, "y": 0, "w": 2, "h": 2, "i": "0", static: true } }
+        { "x": 0, "y": 0, "w": 1, "h": 3, "i": "-1", static: true, element: {} },
+        { "x": 1, "y": 0, "w": 10, "h": 1, "i": "-2", static: true, element: { label: 'バリューチェーン' } },
+        { "x": 1, "y": 1, "w": 2, "h": 2, "i": "0", static: false, element: { label: '事業企画・営業企画' } },
+        { "x": 3, "y": 1, "w": 2, "h": 2, "i": "1", static: false, element: { label: 'フロント営業' } },
+        { "x": 5, "y": 1, "w": 2, "h": 2, "i": "2", static: false, element: { label: '導入コンサル・プリセールス' } },
+        { "x": 7, "y": 1, "w": 2, "h": 2, "i": "3", static: false, element: { label: 'PM' } },
+        { "x": 9, "y": 1, "w": 2, "h": 2, "i": "4", static: false, element: { label: '構築・プロビ' } },
+
       ],
-      verticalHeader: [
-        { id: 1, label: '探索領域' },
-        { id: 2, label: 'モビリティ' },
-        { id: 3, label: '物流' }
+      verticalLayout: [
+        { "x": 0, "y": 2, "w": 1, "h": 2, "i": "5", static: false, element: { label: '探索領域' } },
+        { "x": 0, "y": 4, "w": 1, "h": 5, "i": "6", static: false, element: { label: 'モビリティ' } },
+        { "x": 0, "y": 6, "w": 1, "h": 2, "i": "7", static: false, element: { label: '物流' } },
       ],
-      draggable: true,
-      resizable: true,
-      index: 0
     };
   },
   methods: {
-    itemTitle(item) {
-      let result = item.i;
-      if (item.static) {
-        result += " - Static";
-      }
-      return result;
-    }
+    horizontalHeaderResizeEvent: function (i, newH, newW, newHPx, newWPx) {
+      let resizeElement = false
+      let amountOfGridChange = 0;
+      this.horizontalHeader.forEach((header, index) => {
+        if (resizeElement) {
+          header.x -= amountOfGridChange
+        }
+        if (header.i === i) {
+          amountOfGridChange = header.w - newW
+          resizeElement = true
+        }
+
+      });
+    },
   }
 };
 </script>
@@ -70,7 +66,7 @@ export default {
 
 .vue-grid-item:not(.vue-grid-placeholder) {
   background: #ccc;
-  border: 1px solid black;
+  border: 1px solid #DCDCDC;
 }
 
 .vue-grid-item .resizing {
