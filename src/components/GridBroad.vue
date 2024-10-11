@@ -1,14 +1,24 @@
 <template>
   <div class="grid">
-    <grid-layout :layout.sync="getLayout" :col-num="12" :row-height="30" :is-resizable="resizable" :responsive="false"
-      :vertical-compact="false" :prevent-collision="true" :use-css-transforms="true" :margin="[0, 0]">
-      <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
+    <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w" :row-height="30"
+      :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
+      :use-css-transforms="true" :margin="[0, 0]">
+
+      <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1" class="column-header">
+        <span class="text"></span>
+      </grid-item>
+
+      <grid-item :static="true" :x="blankGridItem.w" :y="0" :w="totalCol" :h="1" :i="-2" class="column-header">
+        <span class="text">バリューチェーン</span>
+      </grid-item>
+
+      <grid-item v-for="item in getColumnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :maxH="2" :minH="2" :i="item.i" :isDraggable="item.isDraggable" class="column-header"
         @resize="columnHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
       <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :maxW="1" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent" class="row">
+        :maxW="2" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent" class="row">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
       <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
@@ -31,21 +41,22 @@ export default {
   },
   data() {
     return {
-      count: 0,
+      totalCol: 100,
+      blankGridItem: { w: 3, h: 3 },
       columnHeader: [
-        { "x": 0, "y": 0, "w": 1, "h": 2, "i": "-1", static: true, element: { label: '' }, isDraggable: false },
-        { "x": 1, "y": 0, "w": 2, "h": 2, "i": "0", static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
-        { "x": 3, "y": 0, "w": 2, "h": 2, "i": "1", static: false, element: { label: 'フロント営業' }, isDraggable: false },
-        { "x": 5, "y": 0, "w": 2, "h": 2, "i": "2", static: false, element: { label: '導入コンサル・プリセールス' }, isDraggable: false },
-        { "x": 7, "y": 0, "w": 2, "h": 2, "i": "3", static: false, element: { label: 'PM' }, isDraggable: false },
-        { "x": 9, "y": 0, "w": 2, "h": 2, "i": "4", static: false, element: { label: '構築・プロビ' }, isDraggable: false },
+        { static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
+        { static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
+        { static: false, element: { label: 'フロント営業' }, isDraggable: false },
+        { static: false, element: { label: '導入コンサル・プリセールス' }, isDraggable: false },
+        { static: false, element: { label: 'PM' }, isDraggable: false },
+        { static: false, element: { label: '構築・プロビ' }, isDraggable: false },
       ],
       rowHeader: [
-        { "x": 0, "y": 2, "w": 1, "h": 2, "i": "5", static: false, element: { label: '探索領域' }, isDraggable: false },
-        { "x": 0, "y": 4, "w": 1, "h": 2, "i": "6", static: false, element: { label: 'モビリティ' }, isDraggable: false },
-        { "x": 0, "y": 6, "w": 1, "h": 2, "i": "7", static: false, element: { label: '物流' }, isDraggable: false },
-        { "x": 0, "y": 8, "w": 1, "h": 2, "i": "8", static: false, element: { label: '物流' }, isDraggable: false },
-        { "x": 0, "y": 10, "w": 1, "h": 2, "i": "9", static: false, element: { label: '物流' }, isDraggable: false },
+        // {  static: false, element: { label: '探索領域' }, isDraggable: false },
+        // {  static: false, element: { label: 'モビリティ' }, isDraggable: false },
+        // {  static: false, element: { label: '物流' }, isDraggable: false },
+        // {  static: false, element: { label: '物流' }, isDraggable: false },
+        // {  static: false, element: { label: '物流' }, isDraggable: false },
       ],
       data: [
         { "x": 3, "y": 6, "w": 1, "h": 2, "i": "10", static: false, element: { label: 'Hehe' }, isDraggable: true, column: [], row: [] },
@@ -62,15 +73,22 @@ export default {
         1,
       );
     },
+    getColumnHeader() {
+      const headerW = (this.totalCol - this.totalCol % this.columnHeader.length) / this.columnHeader.length;
+      const headerX = (index) => this.blankGridItem.w + headerW * index
+      const columnHeaderGrid = this.columnHeader.map((item, index) => ({ ...item, 'i': index, 'x': headerX(index), 'y': 1, 'w': headerW, 'h': 2 }))
+      columnHeaderGrid[this.columnHeader.length - 1].w += this.totalCol % this.columnHeader.length;
+      return columnHeaderGrid
+    },
     getLayout() {
-      return [...this.columnHeader, ...this.rowHeader, ...this.data]
-    }
+      return [...this.getColumnHeader, ...this.rowHeader, ...this.data]
+    },
   },
   methods: {
     columnHeaderResizeEvent: function (i, newH, newW) {
       let resizeElement = false
       let amountOfGridChange = 0;
-      this.columnHeader.forEach((header) => {
+      this.getColumnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
         }
