@@ -4,11 +4,15 @@
       :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
       :use-css-transforms="true" :margin="[0, 0]">
 
-      <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1" class="column-header">
+      <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1">
         <span class="text"></span>
       </grid-item>
 
-      <grid-item :static="true" :x="blankGridItem.w" :y="0" :w="totalCol" :h="1" :i="-2" class="column-header">
+      <grid-item :static="true" :x="blankGridItem.w" :y="0" :w="totalCol" :h="1" :i="-2">
+        <span class="text">バリューチェーン</span>
+      </grid-item>
+
+      <grid-item :static="true" :x="0" :y="blankGridItem.h" :w="2" :h="getTotalRow" :i="-2">
         <span class="text">バリューチェーン</span>
       </grid-item>
 
@@ -17,10 +21,13 @@
         @resize="columnHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
+
       <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :maxW="2" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent" class="row">
+        :minW="2" :maxW="2" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent"
+        class="row-header">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
+
       <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
         :isDraggable="item.isDraggable" class="data">
         <span class="text">{{ item.element.label }}</span>
@@ -42,24 +49,23 @@ export default {
   data() {
     return {
       totalCol: 100,
-      blankGridItem: { w: 3, h: 3 },
+      totalRow: 0,
+      blankGridItem: { w: 4, h: 3 },
       columnHeader: [
-        { static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
-        { static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
-        { static: false, element: { label: 'フロント営業' }, isDraggable: false },
-        { static: false, element: { label: '導入コンサル・プリセールス' }, isDraggable: false },
-        { static: false, element: { label: 'PM' }, isDraggable: false },
-        { static: false, element: { label: '構築・プロビ' }, isDraggable: false },
+        { id: 1, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
+        { id: 2, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
+        { id: 3, static: false, element: { label: 'フロント営業' }, isDraggable: false },
+        { id: 4, static: false, element: { label: '導入コンサル・プリセールス' }, isDraggable: false },
+        { id: 5, static: false, element: { label: 'PM' }, isDraggable: false },
+        { id: 6, static: false, element: { label: '構築・プロビ' }, isDraggable: false },
       ],
       rowHeader: [
-        // {  static: false, element: { label: '探索領域' }, isDraggable: false },
-        // {  static: false, element: { label: 'モビリティ' }, isDraggable: false },
-        // {  static: false, element: { label: '物流' }, isDraggable: false },
-        // {  static: false, element: { label: '物流' }, isDraggable: false },
-        // {  static: false, element: { label: '物流' }, isDraggable: false },
+        { id: 7, static: false, element: { label: '探索領域' }, isDraggable: false },
+        { id: 8, static: false, element: { label: 'モビリティ' }, isDraggable: false },
+        { id: 9, static: false, element: { label: '物流' }, isDraggable: false },
       ],
       data: [
-        { "x": 3, "y": 6, "w": 1, "h": 2, "i": "10", static: false, element: { label: 'Hehe' }, isDraggable: true, column: [], row: [] },
+        { "x": 6, "y": 6, "w": 10, "h": 2, "i": "10", static: false, element: { label: 'Hehe' }, isDraggable: true, column: [], row: [] },
       ],
       draggable: true,
       resizable: true,
@@ -68,22 +74,29 @@ export default {
     };
   },
   created() {
-    const headerW = (this.totalCol - this.totalCol % this.columnHeader.length) / this.columnHeader.length;
-    const headerX = (index) => this.blankGridItem.w + headerW * index
-    const columnHeaderGrid = this.columnHeader.map((item, index) => ({ ...item, 'i': index, 'x': headerX(index), 'y': 1, 'w': headerW, 'h': 2 }))
-    columnHeaderGrid[this.columnHeader.length - 1].w += this.totalCol % this.columnHeader.length;
-    this.columnHeader = columnHeaderGrid
+    const headerColW = (this.totalCol - this.totalCol % this.columnHeader.length) / this.columnHeader.length;
+    const headerColX = (index) => this.blankGridItem.w + headerColW * index
+    const _columnHeader = this.columnHeader.map((item, index) => ({ ...item, 'i': item.id, 'x': headerColX(index), 'y': 1, 'w': headerColW, 'h': 2 }))
+    _columnHeader[this.columnHeader.length - 1].w += this.totalCol % this.columnHeader.length;
+    this.columnHeader = _columnHeader
+
+    const headerRowH = 10
+    const headerRowy = (index) => this.blankGridItem.h + headerRowH * index
+    const _rowHeader = this.rowHeader.map((item, index) => ({ ...item, 'i': item.id, 'x': 2, 'y': headerRowy(index), 'w': 2, 'h': headerRowH }))
+    this.rowHeader = _rowHeader
   },
   computed: {
-    getMaxWidth() {
-      return this.columnHeader.map(data => data.w).reduce(
-        (accumulator, currentValue) => accumulator + currentValue,
-        1,
-      );
-    },
     getLayout() {
       return [...this.columnHeader, ...this.rowHeader, ...this.data]
     },
+    getTotalRow() {
+      return this.rowHeader.reduce(
+        (accumulator, currentValue) => {
+          return (accumulator + currentValue.h)
+        },
+        0
+      );
+    }
   },
   methods: {
     columnHeaderResizeEvent: function (i, newH, newW) {
@@ -128,6 +141,26 @@ export default {
 
 .vue-grid-item .resizing {
   opacity: 0.9;
+}
+
+.column-header::after {
+  display: inline-block;
+  content: "";
+  border-left: 1px solid #DCDCDC;
+  height: 1000px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.row-header::after {
+  display: inline-block;
+  content: "";
+  border-bottom: 1px solid #DCDCDC;
+  width: 5000px;
+  position: absolute;
+  left: 0px;
+  bottom: 0px;
 }
 
 .vue-grid-item .static {
