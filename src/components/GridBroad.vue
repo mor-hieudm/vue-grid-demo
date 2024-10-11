@@ -1,18 +1,18 @@
 <template>
   <div class="grid">
-    <grid-layout :layout.sync="getLayout" :col-num="12" :row-height="30"
-      :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
-      :use-css-transforms="true" :margin="[0,0]">
+    <grid-layout :layout.sync="getLayout" :col-num="12" :row-height="30" :is-resizable="resizable" :responsive="false"
+      :vertical-compact="false" :prevent-collision="true" :use-css-transforms="true" :margin="[0, 0]">
       <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :i="item.i" :isDraggable="item.isDraggable" class="column" @resize="horizontalHeaderResizeEvent">
+        :maxH="2" :minH="2" :i="item.i" :isDraggable="item.isDraggable" class="column-header"
+        @resize="columnHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
       <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-                 :i="item.i" :isDraggable="item.isDraggable" class="row">
+        :maxW="1" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent" class="row">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
-      <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-                 :i="item.i" :isDraggable="item.isDraggable" class="data">
+      <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
+        :isDraggable="item.isDraggable" class="data">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
     </grid-layout>
@@ -33,6 +33,7 @@ export default {
     return {
       count: 0,
       columnHeader: [
+        { "x": 0, "y": 0, "w": 1, "h": 2, "i": "-1", static: true, element: { label: '' }, isDraggable: false },
         { "x": 1, "y": 0, "w": 2, "h": 2, "i": "0", static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
         { "x": 3, "y": 0, "w": 2, "h": 2, "i": "1", static: false, element: { label: 'フロント営業' }, isDraggable: false },
         { "x": 5, "y": 0, "w": 2, "h": 2, "i": "2", static: false, element: { label: '導入コンサル・プリセールス' }, isDraggable: false },
@@ -47,7 +48,7 @@ export default {
         { "x": 0, "y": 10, "w": 1, "h": 2, "i": "9", static: false, element: { label: '物流' }, isDraggable: false },
       ],
       data: [
-        { "x": 3, "y": 6, "w": 1, "h": 2, "i": "10", static: false, element: { label: 'Hehe' },isDraggable: true, column: [], row: [] },
+        { "x": 3, "y": 6, "w": 1, "h": 2, "i": "10", static: false, element: { label: 'Hehe' }, isDraggable: true, column: [], row: [] },
       ],
       draggable: true,
       resizable: true,
@@ -57,19 +58,19 @@ export default {
   computed: {
     getMaxWidth() {
       return this.columnHeader.map(data => data.w).reduce(
-          (accumulator, currentValue) => accumulator + currentValue,
-          1,
+        (accumulator, currentValue) => accumulator + currentValue,
+        1,
       );
     },
     getLayout() {
-      return [...this.columnHeader,...this.rowHeader,...this.data]
+      return [...this.columnHeader, ...this.rowHeader, ...this.data]
     }
   },
   methods: {
-    horizontalHeaderResizeEvent: function (i, newH, newW, newHPx, newWPx) {
+    columnHeaderResizeEvent: function (i, newH, newW) {
       let resizeElement = false
       let amountOfGridChange = 0;
-      this.columnHeader.forEach((header, index) => {
+      this.columnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
         }
@@ -77,7 +78,19 @@ export default {
           amountOfGridChange = header.w - newW
           resizeElement = true
         }
-
+      });
+    },
+    rowHeaderResizeEvent: function (i, newH) {
+      let resizeElement = false
+      let amountOfGridChange = 0;
+      this.rowHeader.forEach((header) => {
+        if (resizeElement) {
+          header.y -= amountOfGridChange
+        }
+        if (header.i === i) {
+          amountOfGridChange = header.h - newH
+          resizeElement = true
+        }
       });
     },
   }
