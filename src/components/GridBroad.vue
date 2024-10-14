@@ -97,6 +97,14 @@ export default {
         0
       );
     },
+    getTotalCol() {
+      return this.columnHeader.reduce(
+        (accumulator, currentValue) => {
+          return (accumulator + currentValue.w)
+        },
+        0
+      );
+    },
     getGridBorderWidth() {
       return (this.totalCol * 30 - 60) + 'px'
     },
@@ -114,13 +122,15 @@ export default {
       this.columnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
-          this.totalCol -= amountOfGridChange
         }
         if (header.i === i) {
           amountOfGridChange = header.w - newW
           resizeElement = true
         }
       });
+      if (resizeElement && this.totalCol <= this.getTotalCol) {
+        this.totalCol -= amountOfGridChange
+      }
     },
     rowHeaderResizeEvent: function (i, newH) {
       let resizeElement = false
