@@ -2,7 +2,7 @@
   <div class="grid">
     <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w" :row-height="30"
       :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
-      :use-css-transforms="true" :margin="[0, 0]">
+      :use-css-transforms="true" :margin="[0, 0]" :style="{ '--width': getContainerWidth }">
 
       <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1">
         <span class="text"></span>
@@ -18,13 +18,13 @@
 
       <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :maxH="2" :minH="2" :i="item.i" :isDraggable="item.isDraggable" class="column-header"
-        @resize="columnHeaderResizeEvent">
+        :style="{ '--borderHeight': getGridBorderHeight }" @resize="columnHeaderResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
 
       <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :minW="2" :maxW="2" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent"
-        class="row-header">
+        :style="{ '--borderWidth': getGridBorderWidth }" class="row-header">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
 
@@ -96,6 +96,15 @@ export default {
         },
         0
       );
+    },
+    getGridBorderWidth() {
+      return (this.totalCol * 30 - 60) + 'px'
+    },
+    getGridBorderHeight() {
+      return (this.getTotalRow * 30 + 60) + 'px'
+    },
+    getContainerWidth() {
+      return this.totalCol * 30 + 'px'
     }
   },
   methods: {
@@ -105,6 +114,7 @@ export default {
       this.columnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
+          this.totalCol -= amountOfGridChange
         }
         if (header.i === i) {
           amountOfGridChange = header.w - newW
@@ -132,6 +142,7 @@ export default {
 <style scoped>
 .vue-grid-layout {
   background: #eee;
+  width: var(--width);
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
@@ -147,17 +158,17 @@ export default {
   display: inline-block;
   content: "";
   border-left: 1px solid #DCDCDC;
-  height: 1000px;
+  height: var(--borderHeight);
   position: absolute;
   top: 0px;
-  left: 0px;
+  right: 0px;
 }
 
 .row-header::after {
   display: inline-block;
   content: "";
   border-bottom: 1px solid #DCDCDC;
-  width: 5000px;
+  width: var(--borderWidth);
   position: absolute;
   left: 0px;
   bottom: 0px;
