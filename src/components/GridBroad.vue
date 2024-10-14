@@ -1,19 +1,24 @@
 <template>
-  <div class="grid">
-    <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w" :row-height="30"
+  <div class="grid-container">
+    <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w + 2" :row-height="30"
       :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
       :use-css-transforms="true" :margin="[0, 0]" :style="{ '--width': getContainerWidth }">
 
       <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1">
-        <span class="text"></span>
+        <div class="grid-blank">
+          <div>m</div>
+          <div>m</div>
+          <div>m</div>
+          <div>m</div>
+        </div>
       </grid-item>
 
       <grid-item :static="true" :x="blankGridItem.w" :y="0" :w="totalCol" :h="1" :i="-2">
-        <span class="text">バリューチェーン</span>
+        <span>バリューチェーン</span>
       </grid-item>
 
-      <grid-item :static="true" :x="0" :y="blankGridItem.h" :w="2" :h="getTotalRow" :i="-2">
-        <span class="text">バリューチェーン</span>
+      <grid-item :static="true" :x="0" :y="blankGridItem.h" :w="1" :h="getTotalRow" :i="-2">
+        <span>バリューチェーン</span>
       </grid-item>
 
       <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
@@ -25,11 +30,11 @@
       <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :minW="2" :maxW="2" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent"
         :style="{ '--borderWidth': getGridBorderWidth }" class="row-header">
-        <span class="text">{{ item.element.label }}</span>
+        <div class="row-header-text">{{ item.element.label }}</div>
       </grid-item>
 
       <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
-        :isDraggable="item.isDraggable" class="data">
+        :isDraggable="item.isDraggable" :resizeOption="event" class="data">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
     </grid-layout>
@@ -50,7 +55,27 @@ export default {
     return {
       totalCol: 100,
       totalRow: 0,
-      blankGridItem: { w: 4, h: 3 },
+      event: {
+        edges: { top: true, left: true, bottom: true, right: true },
+        listeners: {
+          move: function (event) {
+            console.log(event)
+            // let { x, y } = event.target.dataset
+
+            // x = (parseFloat(x) || 0) + event.deltaRect.left
+            // y = (parseFloat(y) || 0) + event.deltaRect.top
+
+            // Object.assign(event.target.style, {
+            //   width: `${event.rect.width}px`,
+            //   height: `${event.rect.height}px`,
+            //   transform: `translate(${x}px, ${y}px)`
+            // })
+
+            // Object.assign(event.target.dataset, { x, y })
+          }
+        }
+      },
+      blankGridItem: { w: 3, h: 3 },
       columnHeader: [
         { id: 1, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
         { id: 2, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
@@ -82,7 +107,7 @@ export default {
 
     const headerRowH = 10
     const headerRowy = (index) => this.blankGridItem.h + headerRowH * index
-    const _rowHeader = this.rowHeader.map((item, index) => ({ ...item, 'i': item.id, 'x': 2, 'y': headerRowy(index), 'w': 2, 'h': headerRowH }))
+    const _rowHeader = this.rowHeader.map((item, index) => ({ ...item, 'i': item.id, 'x': 1, 'y': headerRowy(index), 'w': 2, 'h': headerRowH }))
     this.rowHeader = _rowHeader
   },
   computed: {
@@ -119,6 +144,7 @@ export default {
     columnHeaderResizeEvent: function (i, newH, newW) {
       let resizeElement = false
       let amountOfGridChange = 0;
+      console.log(this.getTotalCol, this.totalCol)
       this.columnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
@@ -128,6 +154,7 @@ export default {
           resizeElement = true
         }
       });
+
       if (resizeElement && this.totalCol <= this.getTotalCol) {
         this.totalCol -= amountOfGridChange
       }
@@ -150,14 +177,31 @@ export default {
 </script>
 
 <style scoped>
+.grid-blank {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  height: 100%;
+}
+
+.grid-blank ::after {
+  display: inline-block;
+  content: "";
+  border-bottom: 1px solid black;
+  width: var(--borderWidth);
+  position: absolute;
+  left: 0px;
+  bottom: 6px;
+  z-index: 99;
+}
+
 .vue-grid-layout {
-  background: #eee;
   width: var(--width);
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
-  background: #ccc;
+  background: #EDEDED;
   border: 1px solid #DCDCDC;
+  align-content: center;
 }
 
 .vue-grid-item .resizing {
@@ -174,6 +218,21 @@ export default {
   right: 0px;
 }
 
+.column-header {
+  background-color: #F8F8F8 !important;
+  border-top: none !important;
+}
+
+.row-header {
+  background-color: #F8F8F8 !important;
+
+}
+
+.row-header-text {
+  word-break: break-all;
+  padding: 0px 13px;
+}
+
 .row-header::after {
   display: inline-block;
   content: "";
@@ -182,11 +241,9 @@ export default {
   position: absolute;
   left: 0px;
   bottom: 0px;
+
 }
 
-.vue-grid-item .static {
-  background: #cce;
-}
 
 .vue-grid-item .text {
   font-size: 16px;
