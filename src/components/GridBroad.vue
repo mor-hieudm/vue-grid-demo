@@ -33,8 +33,9 @@
         <div class="row-header-text">{{ item.element.label }}</div>
       </grid-item>
 
-      <grid-item v-for="item in data" :key="item.i" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
-        :isDraggable="item.isDraggable" class="card-container" @resized="dataResizeEvent" @moved="dataResizeEvent">
+      <grid-item v-for="item in data" :key="item.i" :static="item.static" :x="item.x" :y="item.y" :w="item.w"
+        :h="item.h" :i="item.i" :isDraggable="item.isDraggable" class="card-container" @resized="dataResizeEvent"
+        @moved="dataResizeEvent" :minW="6" :minH="10" v-bind:class="{ 'cursor-change': true }">
         <div class="card-header">
           <div class="header-title">{{ item.element.label }}</div>
           <EditIcon />
@@ -47,8 +48,6 @@
               <div>({{ item2.percent }})</div>
             </div>
           </div>
-
-
         </div>
         <div class="card-footer">
           <div>{{ item.element.totalNum }}名</div>
@@ -218,7 +217,7 @@ export default {
       let fromX = this.findClosestNumber(this.columnHeader.map(data => data.x), currentData.x)
       let fromXColumn = this.columnHeader.find(data => data.x === fromX)
       let toX = currentData.x + currentData.w > fromXColumn.x + fromXColumn.w ? this.findClosestNumber(this.columnHeader.map(data => data.x + data.w), currentData.x + currentData.w) : 0
-      if(toX !== 0) {
+      if (toX !== 0) {
         let toXColumn = this.columnHeader.find(data => data.x === toX)
         return currentData.x + currentData.w === toXColumn.x ? this.columnHeader.filter(data => data.x >= fromX && data.x <= toX).map(data => data.i).filter(data => data !== toXColumn.i) : this.columnHeader.filter(data => data.x >= fromX && data.x <= toX).map(data => data.i)
       }
@@ -228,7 +227,7 @@ export default {
       let fromY = this.findClosestNumber(this.rowHeader.map(data => data.y), currentData.y)
       let fromYColumn = this.rowHeader.find(data => data.y === fromY)
       let toY = currentData.y + currentData.h > fromYColumn.y + fromYColumn.h ? this.findClosestNumber(this.rowHeader.map(data => data.y + data.h), currentData.y + currentData.h) : 0
-      if(toY !== 0) {
+      if (toY !== 0) {
         let toYColumn = this.rowHeader.find(data => data.y === toY)
         return currentData.y + currentData.h === toYColumn.y ? this.rowHeader.filter(data => data.y >= fromY && data.y <= toY).map(data => data.i).filter(data => data !== toYColumn.i) : this.rowHeader.filter(data => data.y >= fromY && data.y <= toY).map(data => data.i)
       }
@@ -251,7 +250,20 @@ export default {
   align-items: center;
 }
 
-.vue-grid-item:not(.vue-grid-placeholder) > .vue-resizable-handle {
+::v-deep.column-header .vue-resizable-handle {
+  cursor: url(../assets/img/ColResize.svg) 4 12, auto;
+}
+
+
+::v-deep.row-header .vue-resizable-handle {
+  cursor: url(../assets/img/RowResize.svg) 4 12, auto;
+}
+
+::v-deep .vue-resizable-handle {
+  background: none !important;
+}
+
+::v-deep .cursor-change .vue-grid-item {
   cursor: col-resize !important;
 }
 
@@ -297,6 +309,8 @@ export default {
   padding-bottom: 5px;
   padding-top: 8px;
   border: 1px solid #DCDCDC;
+  border-end-start-radius: 6px;
+  border-end-end-radius: 6px;
 }
 
 
@@ -335,10 +349,12 @@ export default {
   border: 1px solid #DCDCDC;
   align-content: center;
 }
+
 .card-container {
   touch-action: none;
   box-sizing: border-box;
 }
+
 .vue-grid-item .resizing {
   opacity: 0.9;
 }
@@ -411,10 +427,5 @@ export default {
   background-origin: content-box;
   box-sizing: border-box;
   cursor: pointer;
-}
-/deep/.column-header .vue-resizable-handle {
-  background: none !important;
-  cursor: col-resize !important;
-
 }
 </style>
