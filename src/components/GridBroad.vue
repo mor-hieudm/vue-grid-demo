@@ -6,10 +6,10 @@
 
       <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1">
         <div class="grid-blank">
-          <div>m</div>
-          <div>m</div>
-          <div>m</div>
-          <div>m</div>
+          <div></div>
+          <div>横軸</div>
+          <div>縦軸</div>
+          <div></div>
         </div>
       </grid-item>
 
@@ -34,14 +34,33 @@
       </grid-item>
 
       <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
-        :isDraggable="item.isDraggable" :resizeOption="event" class="data">
-        <span class="text">{{ item.element.label }}</span>
+        :isDraggable="item.isDraggable" class="card-container">
+        <div class="card-header">
+          <div class="header-title">{{ item.element.label }}</div>
+          <EditIcon />
+        </div>
+        <div class="card-body">
+          <div v-for="item2 in item.element.score" :key="item.id" class="body-item">
+            <div class="mark-context">{{ item2.mark }}</div>
+            <div class="mark-sub-context">
+              <div>{{ item2.number }}名</div>
+              <div>({{ item2.percent }})</div>
+            </div>
+          </div>
+
+
+        </div>
+        <div class="card-footer">
+          <div>{{ item.element.totalNum }}名</div>
+          <div class="footer-sub-title">（20.0%）</div>
+        </div>
       </grid-item>
     </grid-layout>
   </div>
 </template>
 <script>
 import { GridLayout, GridItem } from "vue-grid-layout"
+import EditIcon from "../assets/icon/EditIcon.vue"
 export default {
   name: "GridBroad",
   props: {
@@ -49,32 +68,12 @@ export default {
   },
   components: {
     GridLayout,
-    GridItem
+    GridItem, EditIcon
   },
   data() {
     return {
       totalCol: 100,
       totalRow: 0,
-      event: {
-        edges: { top: true, left: true, bottom: true, right: true },
-        listeners: {
-          move: function (event) {
-            console.log(event)
-            // let { x, y } = event.target.dataset
-
-            // x = (parseFloat(x) || 0) + event.deltaRect.left
-            // y = (parseFloat(y) || 0) + event.deltaRect.top
-
-            // Object.assign(event.target.style, {
-            //   width: `${event.rect.width}px`,
-            //   height: `${event.rect.height}px`,
-            //   transform: `translate(${x}px, ${y}px)`
-            // })
-
-            // Object.assign(event.target.dataset, { x, y })
-          }
-        }
-      },
       blankGridItem: { w: 3, h: 3 },
       columnHeader: [
         { id: 1, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
@@ -90,7 +89,48 @@ export default {
         { id: 9, static: false, element: { label: '物流' }, isDraggable: false },
       ],
       data: [
-        { "x": 6, "y": 6, "w": 10, "h": 2, "i": "10", static: false, element: { label: 'Hehe' }, isDraggable: true, column: [], row: [] },
+        {
+          "x": 6, "y": 16, "w": 10, "h": 10, "i": "11", static: false, element: {
+            label: '事業企画・事業管理',
+            score: [
+              { id: 1, mark: 'A', number: 4, percent: "5%" },
+              { id: 2, mark: 'B+', number: 5, percent: "6,26%" },
+              { id: 3, mark: 'B', number: 24, percent: "30%" },
+              { id: 4, mark: 'C+', number: 20, percent: "25%" },
+              { id: 5, mark: 'C', number: 15, percent: "18,75%" },
+              { id: 6, mark: 'D+', number: 4, percent: "5%" },
+            ],
+            totalNum: 80
+          }, isDraggable: true, column: [], row: []
+        },
+        {
+          "x": 6, "y": 6, "w": 10, "h": 10, "i": "12", static: false, element: {
+            label: 'テクノロジスト',
+            score: [
+              { id: 1, mark: 'A', number: 4, percent: "5%" },
+              { id: 2, mark: 'B+', number: 5, percent: "6,26%" },
+              { id: 3, mark: 'B', number: 24, percent: "30%" },
+              { id: 4, mark: 'C+', number: 20, percent: "25%" },
+              { id: 5, mark: 'C', number: 15, percent: "18,75%" },
+              { id: 6, mark: 'D+', number: 4, percent: "5%" },
+            ],
+            totalNum: 80
+          }, isDraggable: true, column: [], row: []
+        },
+        {
+          "x": 22, "y": 6, "w": 10, "h": 10, "i": "10", static: false, element: {
+            label: '事業企画・事業管理',
+            score: [
+              { id: 1, mark: 'A', number: 4, percent: "5%" },
+              { id: 2, mark: 'B+', number: 5, percent: "6,26%" },
+              { id: 3, mark: 'B', number: 24, percent: "30%" },
+              { id: 4, mark: 'C+', number: 20, percent: "25%" },
+              { id: 5, mark: 'C', number: 15, percent: "18,75%" },
+              { id: 6, mark: 'D+', number: 4, percent: "5%" },
+            ],
+            totalNum: 80
+          }, isDraggable: true, column: [], row: []
+        },
       ],
       draggable: true,
       resizable: true,
@@ -131,7 +171,7 @@ export default {
       );
     },
     getGridBorderWidth() {
-      return (this.totalCol * 30 - 60) + 'px'
+      return (this.totalCol * 30 - 88) + 'px'
     },
     getGridBorderHeight() {
       return (this.getTotalRow * 30 + 60) + 'px'
@@ -144,7 +184,6 @@ export default {
     columnHeaderResizeEvent: function (i, newH, newW) {
       let resizeElement = false
       let amountOfGridChange = 0;
-      console.log(this.getTotalCol, this.totalCol)
       this.columnHeader.forEach((header) => {
         if (resizeElement) {
           header.x -= amountOfGridChange
@@ -181,17 +220,82 @@ export default {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   height: 100%;
+  align-items: center;
+}
+
+.vue-grid-item:not(.vue-grid-placeholder) > .vue-resizable-handle {
+  cursor: col-resize !important;
+}
+
+.card-header {
+  background-color: #007BC3;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  padding: 12.5px 8px;
+  font-size: 12px;
+}
+
+.body-item {
+  display: flex;
+  flex-direction: row;
+  padding: 8px 16px;
+  justify-content: space-between;
+}
+
+.card-body {
+  flex: 1;
+  border-left: 1px solid #DCDCDC;
+  border-right: 1px solid #DCDCDC;
+}
+
+.mark-sub-context {
+  display: flex;
+  width: 83px;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #666666;
+
+}
+
+.card-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  padding-right: 16px;
+  padding-bottom: 5px;
+  padding-top: 8px;
+  border: 1px solid #DCDCDC;
+}
+
+
+.footer-sub-title {
+  font-size: 10px;
+}
+
+.header-title {}
+
+.card-container {
+  border: none !important;
+  background-color: #F8F8F8 !important;
+  display: flex;
+  flex-direction: column;
+  border-radius: 6px;
 }
 
 .grid-blank ::after {
   display: inline-block;
   content: "";
-  border-bottom: 1px solid black;
-  width: var(--borderWidth);
+  border-bottom: 1px solid #DCDCDC;
+  width: 125px;
   position: absolute;
-  left: 0px;
-  bottom: 6px;
+  left: -20px;
+  bottom: 44px;
   z-index: 99;
+  transform: rotate(45deg);
 }
 
 .vue-grid-layout {
@@ -243,7 +347,6 @@ export default {
   bottom: 0px;
 
 }
-
 
 .vue-grid-item .text {
   font-size: 16px;
