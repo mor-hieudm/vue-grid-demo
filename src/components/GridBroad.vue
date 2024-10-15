@@ -1,6 +1,6 @@
 <template>
   <div class="grid">
-    <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w" :row-height="30"
+    <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w + 2" :row-height="30"
       :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
       :use-css-transforms="true" :margin="[0, 0]" :style="{ '--width': getContainerWidth }">
 
@@ -27,9 +27,8 @@
         :style="{ '--borderWidth': getGridBorderWidth }" class="row-header">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
-
-      <grid-item v-for="item in data" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
-        :isDraggable="item.isDraggable" class="data">
+      <grid-item v-for="item in data" :key="item.i" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i"
+                 :isDraggable="item.isDraggable" class="data" @resized="dataResizeEvent" @moved="dataResizeEvent">
         <span class="text">{{ item.element.label }}</span>
       </grid-item>
     </grid-layout>
@@ -145,6 +144,34 @@ export default {
         }
       });
     },
+    findClosestNumber(array, x) {
+      return array.filter(num => num <= x).reduce((prev, curr) => Math.abs(curr - x) < Math.abs(prev - x) ? curr : prev, -Infinity);
+    },
+    findColumnRange(currentData) {
+      let fromX = this.findClosestNumber(this.columnHeader.map(data => data.x), currentData.x)
+      let fromXColumn = this.columnHeader.find(data => data.x === fromX)
+      let toX = currentData.x + currentData.w > fromXColumn.x + fromXColumn.w ? this.findClosestNumber(this.columnHeader.map(data => data.x + data.w), currentData.x + currentData.w) : 0
+      if(toX !== 0) {
+        let toXColumn = this.columnHeader.find(data => data.x === toX)
+        return currentData.x + currentData.w === toXColumn.x ? this.columnHeader.filter(data => data.x >= fromX && data.x <= toX).map(data => data.i).filter(data => data !== toXColumn.i) : this.columnHeader.filter(data => data.x >= fromX && data.x <= toX).map(data => data.i)
+      }
+      return [fromXColumn.i]
+    },
+    findRowRange(currentData) {
+      let fromY = this.findClosestNumber(this.rowHeader.map(data => data.y), currentData.y)
+      let fromYColumn = this.rowHeader.find(data => data.y === fromY)
+      let toY = currentData.y + currentData.h > fromYColumn.y + fromYColumn.h ? this.findClosestNumber(this.rowHeader.map(data => data.y + data.h), currentData.y + currentData.h) : 0
+      if(toY !== 0) {
+        let toYColumn = this.rowHeader.find(data => data.y === toY)
+        return currentData.y + currentData.h === toYColumn.y ? this.rowHeader.filter(data => data.y >= fromY && data.y <= toY).map(data => data.i).filter(data => data !== toYColumn.i) : this.rowHeader.filter(data => data.y >= fromY && data.y <= toY).map(data => data.i)
+      }
+      return [fromYColumn.i]
+    },
+    dataResizeEvent: function (i) {
+      let currentData = this.data.find(data => data.i === i)
+      currentData.column = this.findColumnRange(currentData)
+      currentData.row = this.findRowRange(currentData)
+    }
   }
 };
 </script>
@@ -159,7 +186,10 @@ export default {
   background: #ccc;
   border: 1px solid #DCDCDC;
 }
-
+.data {
+  touch-action: none;
+  box-sizing: border-box;
+}
 .vue-grid-item .resizing {
   opacity: 0.9;
 }
