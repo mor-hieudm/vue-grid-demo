@@ -335,7 +335,7 @@ export default {
   border: 1px solid #DCDCDC;
   align-content: center;
 }
-.data {
+.card-container {
   touch-action: none;
   box-sizing: border-box;
 }
@@ -411,5 +411,10 @@ export default {
   background-origin: content-box;
   box-sizing: border-box;
   cursor: pointer;
+}
+/deep/.column-header .vue-resizable-handle {
+  background: none !important;
+  cursor: col-resize !important;
+
 }
 </style>
