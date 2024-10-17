@@ -43,13 +43,12 @@
 </template>
 <script>
 import { GridLayout, GridItem } from "vue-grid-layout"
-import EditIcon from "../assets/icon/EditIcon.vue"
 import GridCard from "./GridCard.vue";
 export default {
   name: "GridBroad",
   components: {
     GridLayout,
-    GridItem, EditIcon, GridCard
+    GridItem, GridCard
   },
   data() {
     return {

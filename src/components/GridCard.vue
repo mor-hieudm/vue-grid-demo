@@ -20,8 +20,10 @@
   </div>
 </template>
 <script>
+import EditIcon from '../assets/icon/EditIcon.vue'
 export default {
   name: "GridCard",
+  components: {EditIcon},
   props: {
     label: String,
     score: { type: Array },
