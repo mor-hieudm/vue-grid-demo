@@ -363,6 +363,8 @@ export default {
 .card-container {
   border: none !important;
   background-color: #F8F8F8 !important;
+  touch-action: none;
+  box-sizing: border-box;
 }
 
 .header-main-title {
@@ -411,6 +413,8 @@ export default {
   border-top: none !important;
   display: flex;
   align-items: center;
+  touch-action: none;
+  box-sizing: border-box;
 }
 
 .column-header div {
@@ -422,6 +426,8 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  touch-action: none;
+  box-sizing: border-box;
 }
 
 .row-header-text {
