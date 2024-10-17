@@ -349,9 +349,6 @@ export default {
   background: none !important;
 }
 
-::v-deep .vue-grid-item {
-  align-content: center;
-}
 
 ::v-deep.column-header.resizing {
   cursor: url(../assets/img/ColResize.svg) 4 12, auto !important;
@@ -405,11 +402,16 @@ export default {
 .column-header {
   background-color: #F8F8F8 !important;
   border-top: none !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .row-header {
   background-color: #F8F8F8 !important;
-
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .row-header-text {
