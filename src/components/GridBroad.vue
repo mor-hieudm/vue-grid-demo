@@ -23,12 +23,12 @@
 
       <grid-item class="column-header" v-for="item in columnHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :maxH="2" :minH="2" :i="item.i" :isResizable="true" :isDraggable="false"
-        :style="{ '--borderHeight': getGridBorderHeight }" @resize="columnHeaderResizeEvent">
+        :style="{ '--borderHeight': getGridBorderHeight }" @resize="columnHeaderResizeEvent" @resized="calculateData">
         <div>{{ item.element.label }}</div>
       </grid-item>
 
       <grid-item class="row-header" v-for="item in rowHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :minW="2"
-        :maxW="2" :i="item.i" :isResizable="true" :isDraggable="false" @resize="rowHeaderResizeEvent"
+        :maxW="2" :i="item.i" :isResizable="true" :isDraggable="false" @resize="rowHeaderResizeEvent" @resized="calculateData"
         :style="{ '--borderWidth': getGridBorderWidth }">
         <div class="row-header-text">{{ item.element.label }}</div>
       </grid-item>
@@ -142,99 +142,97 @@ export default {
     };
   },
   created() {
-    {//calculate ColHeader Grid
-      const colYPosition = 1;
-      let colXPosition = this.blankGridItem.w;
-      this.columnHeader = this.columnHeader.map((col) => {
-        let totalColWidth = 0;
-        this.mockApiData.forEach((data) => {
-          if (data.column.includes(col.id)) {
-            totalColWidth += this.gridPadding + this.defaultGridItem.w
-          }
-        })
-
-        if (!totalColWidth) {
-          totalColWidth = this.gridPadding + this.defaultGridItem.w
+    //calculate ColHeader Grid
+    const colYPosition = 1;
+    let colXPosition = this.blankGridItem.w;
+    this.columnHeader = this.columnHeader.map((col) => {
+      let totalColWidth = 0;
+      this.mockApiData.forEach((data) => {
+        if (data.column.includes(col.id)) {
+          totalColWidth += this.gridPadding + this.defaultGridItem.w
         }
-
-        const tempColHeader = {
-          x: colXPosition,
-          y: colYPosition,
-          w: totalColWidth + this.gridPadding,
-          h: this.blankGridItem.h - this.parentColHeader.h,
-          i: col.id,
-          ...col
-        }
-        colXPosition += tempColHeader.w
-        return tempColHeader
       })
-      this.totalCol = this.getTotalCol
-    }
 
-    { //calculate RowHeader Grid
-
-      const rowXPosition = 1;
-      let rowYPosition = this.blankGridItem.h;
-      this.rowHeader = this.rowHeader.map((row) => {
-        let totalColHeight = 0;
-
-        if (!totalColHeight) {
-          totalColHeight = this.gridPadding + this.defaultGridItem.h
-        }
-
-        const tempRowHeader = {
-          x: rowXPosition,
-          y: rowYPosition,
-          w: this.blankGridItem.w - this.parentRowHeader.w,
-          h: totalColHeight + this.gridPadding,
-          i: row.id,
-          ...row
-        }
-        rowYPosition += tempRowHeader.h
-        return tempRowHeader
-      })
-    }
-
-    {// calculate grid data
-
-      const hashMapColStacks = {}
-      for (const element of this.columnHeader) {
-        hashMapColStacks[element.id] = [];
+      if (!totalColWidth) {
+        totalColWidth = this.gridPadding + this.defaultGridItem.w
       }
 
-      const hashMapRowStacks = {}
-      for (const element of this.rowHeader) {
-        hashMapRowStacks[element.id] = [];
+      const tempColHeader = {
+        x: colXPosition,
+        y: colYPosition,
+        w: totalColWidth + this.gridPadding,
+        h: this.blankGridItem.h - this.parentColHeader.h,
+        i: col.id,
+        ...col
       }
-      this.data = this.mockApiData.map((data) => {
-        let colXPosition = this.columnHeader.find((col) => col.id === data.column[0]).x + this.gridPadding
-        if (hashMapColStacks[data.column[0]].length) {
-          hashMapColStacks[data.column[0]].push(data.id)
-          colXPosition += (this.defaultGridItem.w + this.gridPadding)
-        } else {
-          hashMapColStacks[data.column[0]].push(data.id)
-        }
+      colXPosition += tempColHeader.w
+      return tempColHeader
+    })
+    this.totalCol = this.getTotalCol
 
-        let colYPosition = this.rowHeader.find((row) => row.id === data.row[0]).y + this.gridPadding
-        hashMapRowStacks[data.row[0]].push(data.id)
-        // if (hashMapRowStacks[data.row[0]].length) {
-        //   hashMapRowStacks[data.row[0]].push(data.id)
-        //   colYPosition += (this.defaultGridItem.h + gridPadding)
-        // } else {
-        //   hashMapRowStacks[data.row[0]].push(data.id)
-        // }
 
-        const tempData = {
-          x: colXPosition,
-          y: colYPosition,
-          w: this.defaultGridItem.w,
-          h: this.defaultGridItem.h,
-          i: data.id,
-          ...data
-        }
-        return tempData
-      })
+    //calculate RowHeader Grid
+
+    const rowXPosition = 1;
+    let rowYPosition = this.blankGridItem.h;
+    this.rowHeader = this.rowHeader.map((row) => {
+      let totalColHeight = 0;
+
+      if (!totalColHeight) {
+        totalColHeight = this.gridPadding + this.defaultGridItem.h
+      }
+
+      const tempRowHeader = {
+        x: rowXPosition,
+        y: rowYPosition,
+        w: this.blankGridItem.w - this.parentRowHeader.w,
+        h: totalColHeight + this.gridPadding,
+        i: row.id,
+        ...row
+      }
+      rowYPosition += tempRowHeader.h
+      return tempRowHeader
+    })
+
+    // calculate grid data
+    const hashMapColStacks = {}
+    for (const element of this.columnHeader) {
+      hashMapColStacks[element.id] = [];
     }
+
+    const hashMapRowStacks = {}
+    for (const element of this.rowHeader) {
+      hashMapRowStacks[element.id] = [];
+    }
+    this.data = this.mockApiData.map((data) => {
+      let colXPosition = this.columnHeader.find((col) => col.id === data.column[0]).x + this.gridPadding
+      if (hashMapColStacks[data.column[0]].length) {
+        hashMapColStacks[data.column[0]].push(data.id)
+        colXPosition += (this.defaultGridItem.w + this.gridPadding)
+      } else {
+        hashMapColStacks[data.column[0]].push(data.id)
+      }
+
+      let colYPosition = this.rowHeader.find((row) => row.id === data.row[0]).y + this.gridPadding
+      hashMapRowStacks[data.row[0]].push(data.id)
+      // if (hashMapRowStacks[data.row[0]].length) {
+      //   hashMapRowStacks[data.row[0]].push(data.id)
+      //   colYPosition += (this.defaultGridItem.h + gridPadding)
+      // } else {
+      //   hashMapRowStacks[data.row[0]].push(data.id)
+      // }
+
+      const tempData = {
+        x: colXPosition,
+        y: colYPosition,
+        w: this.defaultGridItem.w,
+        h: this.defaultGridItem.h,
+        i: data.id,
+        ...data
+      }
+      return tempData
+    })
+
   },
   computed: {
     getLayout() {
@@ -296,6 +294,11 @@ export default {
           resizeElement = true
         }
       });
+    },
+    calculateData() {
+      this.data.map(data => {
+        this.dataResizeEvent(data.i)
+      })
     },
     findClosestNumber(array, x) {
       return array.filter(num => num <= x).reduce((prev, curr) => Math.abs(curr - x) < Math.abs(prev - x) ? curr : prev, -Infinity);
