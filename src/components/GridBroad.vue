@@ -17,7 +17,8 @@
         <span>バリューチェーン</span>
       </grid-item>
 
-      <grid-item class="header-main-title" :static="true" :x="0" :y="blankGridItem.h" :w="1" :h="getTotalRow" :i="-2">
+      <grid-item class="header-row-main-title" :static="true" :x="0" :y="blankGridItem.h" :w="1" :h="getTotalRow"
+        :i="-3">
         <span>バリューチェーン</span>
       </grid-item>
 
@@ -28,8 +29,8 @@
       </grid-item>
 
       <grid-item class="row-header" v-for="item in rowHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :minW="2"
-        :maxW="2" :i="item.i" :isResizable="true" :isDraggable="false" @resize="rowHeaderResizeEvent" @resized="calculateData"
-        :style="{ '--borderWidth': getGridBorderWidth }">
+        :maxW="2" :i="item.i" :isResizable="true" :isDraggable="false" @resize="rowHeaderResizeEvent"
+        @resized="calculateData" :style="{ '--borderWidth': getGridBorderWidth }">
         <div class="row-header-text">{{ item.element.label }}</div>
       </grid-item>
 
@@ -349,8 +350,8 @@ export default {
 
 ::v-deep .vue-resizable-handle {
   background: none !important;
+  height: 100%;
 }
-
 
 ::v-deep.column-header.resizing {
   cursor: url(../assets/img/ColResize.svg) 4 12, auto !important;
@@ -371,27 +372,46 @@ export default {
   display: flex;
   justify-content: center;
   align-items: center;
+  border-top: 1px solid #DCDCDC;
+  border-right: 1px solid #DCDCDC;
+  touch-action: none;
+  box-sizing: border-box;
+}
+
+.header-row-main-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  box-sizing: border-box;
+  border-left: 1px solid #DCDCDC;
+}
+
+.grid-blank {
+  border: 1px solid #DCDCDC !important;
+  touch-action: none;
+  box-sizing: border-box;
 }
 
 .grid-blank ::after {
   display: inline-block;
   content: "";
   border-bottom: 1px solid #DCDCDC;
-  width: 125px;
+  width: 122px;
   position: absolute;
   left: -20px;
-  bottom: 44px;
+  bottom: 45px;
   z-index: 99;
-  transform: rotate(45deg);
+  transform: rotate(47.5deg);
 }
 
 .vue-grid-layout {
   width: var(--width);
+
 }
 
 .vue-grid-item:not(.vue-grid-placeholder) {
   background: #EDEDED;
-  border: 1px solid #DCDCDC;
 }
 
 .vue-grid-item .resizing {
@@ -405,20 +425,21 @@ export default {
   height: var(--borderHeight);
   position: absolute;
   top: 0px;
-  right: 0px;
+  right: 1px;
 }
 
 .column-header {
   background-color: #F8F8F8 !important;
-  border-top: none !important;
+  border: none !important;
   display: flex;
   align-items: center;
   touch-action: none;
   box-sizing: border-box;
+  border-bottom: 1px solid #DCDCDC !important;
 }
 
 .column-header div {
-  padding-left: 8px;
+  padding: 0px 8px;
 }
 
 .row-header {
@@ -428,6 +449,7 @@ export default {
   align-items: center;
   touch-action: none;
   box-sizing: border-box;
+  border-right: 1px solid #DCDCDC !important;
 }
 
 .row-header-text {
@@ -443,7 +465,6 @@ export default {
   position: absolute;
   left: 0px;
   bottom: 0px;
-
 }
 
 .vue-draggable-handle {
