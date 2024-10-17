@@ -13,11 +13,11 @@
         </div>
       </grid-item>
 
-      <grid-item :static="true" :x="blankGridItem.w" :y="0" :w="totalCol" :h="1" :i="-2">
+      <grid-item class="header-main-title" :static="true" :x="blankGridItem.w" :y="0" :w="totalCol" :h="1" :i="-2">
         <span>バリューチェーン</span>
       </grid-item>
 
-      <grid-item :static="true" :x="0" :y="blankGridItem.h" :w="1" :h="getTotalRow" :i="-2">
+      <grid-item class="header-main-title" :static="true" :x="0" :y="blankGridItem.h" :w="1" :h="getTotalRow" :i="-2">
         <span>バリューチェーン</span>
       </grid-item>
 
@@ -358,10 +358,15 @@ export default {
   cursor: url(../assets/img/RowResize.svg) 4 12, auto !important;
 }
 
-
 .card-container {
   border: none !important;
   background-color: #F8F8F8 !important;
+}
+
+.header-main-title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .grid-blank ::after {
@@ -403,8 +408,11 @@ export default {
   background-color: #F8F8F8 !important;
   border-top: none !important;
   display: flex;
-  justify-content: center;
   align-items: center;
+}
+
+.column-header div {
+  padding-left: 8px;
 }
 
 .row-header {
