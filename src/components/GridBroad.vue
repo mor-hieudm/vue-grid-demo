@@ -1,7 +1,7 @@
 <template>
   <div class="grid-container">
     <grid-layout :layout.sync="getLayout" :col-num="totalCol + blankGridItem.w + 2" :row-height="30"
-      :is-resizable="resizable" :responsive="false" :vertical-compact="false" :prevent-collision="true"
+      :is-resizable="true" :responsive="false" :vertical-compact="false" :prevent-collision="true"
       :use-css-transforms="true" :margin="[0, 0]" :style="{ '--width': getContainerWidth }">
 
       <grid-item :static="true" :x="0" :y="0" :w="blankGridItem.w" :h="blankGridItem.h" :i="-1">
@@ -21,38 +21,22 @@
         <span>バリューチェーン</span>
       </grid-item>
 
-      <grid-item v-for="item in columnHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :maxH="2" :minH="2" :i="item.i" :isDraggable="item.isDraggable" class="column-header"
+      <grid-item class="column-header" v-for="item in columnHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
+        :maxH="2" :minH="2" :i="item.i" :isResizable="true" :isDraggable="false"
         :style="{ '--borderHeight': getGridBorderHeight }" @resize="columnHeaderResizeEvent">
-        <span class="text">{{ item.element.label }}</span>
+        <div>{{ item.element.label }}</div>
       </grid-item>
 
-      <grid-item v-for="item in rowHeader" :static="item.static" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-        :minW="2" :maxW="2" :i="item.i" :isDraggable="item.isDraggable" @resize="rowHeaderResizeEvent"
-        :style="{ '--borderWidth': getGridBorderWidth }" class="row-header">
+      <grid-item class="row-header" v-for="item in rowHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :minW="2"
+        :maxW="2" :i="item.i" :isResizable="true" :isDraggable="false" @resize="rowHeaderResizeEvent"
+        :style="{ '--borderWidth': getGridBorderWidth }">
         <div class="row-header-text">{{ item.element.label }}</div>
       </grid-item>
 
       <grid-item v-for="item in data" :key="item.i" :static="item.static" :x="item.x" :y="item.y" :w="item.w"
         :h="item.h" :i="item.i" :isDraggable="item.isDraggable" class="card-container" @resized="dataResizeEvent"
-        @moved="dataResizeEvent" :minW="6" :minH="10" v-bind:class="{ 'cursor-change': true }">
-        <div class="card-header">
-          <div class="header-title">{{ item.element.label }}</div>
-          <EditIcon />
-        </div>
-        <div class="card-body">
-          <div v-for="item2 in item.element.score" :key="item.id" class="body-item">
-            <div class="mark-context">{{ item2.mark }}</div>
-            <div class="mark-sub-context">
-              <div>{{ item2.number }}名</div>
-              <div>({{ item2.percent }})</div>
-            </div>
-          </div>
-        </div>
-        <div class="card-footer">
-          <div>{{ item.element.totalNum }}名</div>
-          <div class="footer-sub-title">（20.0%）</div>
-        </div>
+        @moved="dataResizeEvent" :minW="6" :minH="10">
+        <GridCard :label="item.element.label" :score="item.element.score" :totalNum="item.element.totalNum" />
       </grid-item>
     </grid-layout>
   </div>
@@ -60,36 +44,43 @@
 <script>
 import { GridLayout, GridItem } from "vue-grid-layout"
 import EditIcon from "../assets/icon/EditIcon.vue"
+import GridCard from "./GridCard.vue";
 export default {
   name: "GridBroad",
-  props: {
-    msg: String,
-  },
   components: {
     GridLayout,
-    GridItem, EditIcon
+    GridItem, EditIcon, GridCard
   },
   data() {
     return {
       totalCol: 100,
       totalRow: 0,
+      gridPadding: 1,
       blankGridItem: { w: 3, h: 3 },
+      defaultGridItem: { w: 6, h: 10 },
+      parentColHeader: { w: this.totalCol, h: 1 },
+      parentRowHeader: { w: 1, h: this.getTotalRow },
       columnHeader: [
-        { id: 1, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
-        { id: 2, static: false, element: { label: '事業企画・営業企画' }, isDraggable: false },
-        { id: 3, static: false, element: { label: 'フロント営業' }, isDraggable: false },
-        { id: 4, static: false, element: { label: '導入コンサル・プリセールス' }, isDraggable: false },
-        { id: 5, static: false, element: { label: 'PM' }, isDraggable: false },
-        { id: 6, static: false, element: { label: '構築・プロビ' }, isDraggable: false },
+        { id: 1, element: { label: '事業企画・営業企画', gridChildIds: [] } },
+        { id: 2, element: { label: '事業企画・営業企画', gridChildIds: [] } },
+        { id: 3, element: { label: 'フロント営業', gridChildIds: [] } },
+        { id: 4, element: { label: '導入コンサル・プリセールス', gridChildIds: [] } },
+        { id: 5, element: { label: 'PM', gridChildIds: [] } },
+        { id: 6, element: { label: '構築・プロビ', gridChildIds: [] } },
       ],
+
       rowHeader: [
-        { id: 7, static: false, element: { label: '探索領域' }, isDraggable: false },
-        { id: 8, static: false, element: { label: 'モビリティ' }, isDraggable: false },
-        { id: 9, static: false, element: { label: '物流' }, isDraggable: false },
+        { id: 7, element: { label: '探索領域', gridChildIds: [] }, },
+        { id: 8, element: { label: 'モビリティ', gridChildIds: [] }, },
+        { id: 9, element: { label: '物流', gridChildIds: [] }, },
       ],
-      data: [
+
+      data: [],
+
+      mockApiData: [
         {
-          "x": 6, "y": 16, "w": 10, "h": 10, "i": "11", static: false, element: {
+          id: 100,
+          element: {
             label: '事業企画・事業管理',
             score: [
               { id: 1, mark: 'A', number: 4, percent: "5%" },
@@ -100,10 +91,11 @@ export default {
               { id: 6, mark: 'D+', number: 4, percent: "5%" },
             ],
             totalNum: 80
-          }, isDraggable: true, column: [], row: []
+          }, column: [2], row: [7]
         },
         {
-          "x": 6, "y": 6, "w": 10, "h": 10, "i": "12", static: false, element: {
+          id: 11,
+          element: {
             label: 'テクノロジスト',
             score: [
               { id: 1, mark: 'A', number: 4, percent: "5%" },
@@ -114,11 +106,12 @@ export default {
               { id: 6, mark: 'D+', number: 4, percent: "5%" },
             ],
             totalNum: 80
-          }, isDraggable: true, column: [], row: []
+          }, column: [2], row: [7]
         },
         {
-          "x": 22, "y": 6, "w": 10, "h": 10, "i": "10", static: false, element: {
-            label: '事業企画・事業管理',
+          id: 12,
+          element: {
+            label: 'テクノロジスト2',
             score: [
               { id: 1, mark: 'A', number: 4, percent: "5%" },
               { id: 2, mark: 'B+', number: 5, percent: "6,26%" },
@@ -128,26 +121,121 @@ export default {
               { id: 6, mark: 'D+', number: 4, percent: "5%" },
             ],
             totalNum: 80
-          }, isDraggable: true, column: [], row: []
+          }, column: [4], row: [9]
+        },
+        {
+          id: 13,
+          element: {
+            label: 'ソリューションSE',
+            score: [
+              { id: 1, mark: 'A', number: 4, percent: "5%" },
+              { id: 2, mark: 'B+', number: 5, percent: "6,26%" },
+              { id: 3, mark: 'B', number: 24, percent: "30%" },
+              { id: 4, mark: 'C+', number: 20, percent: "25%" },
+              { id: 5, mark: 'C', number: 15, percent: "18,75%" },
+              { id: 6, mark: 'D+', number: 4, percent: "5%" },
+            ],
+            totalNum: 80
+          }, column: [1], row: [8]
         },
       ],
-      draggable: true,
-      resizable: true,
-      index: 0,
-      refreshKey: true,
     };
   },
   created() {
-    const headerColW = (this.totalCol - this.totalCol % this.columnHeader.length) / this.columnHeader.length;
-    const headerColX = (index) => this.blankGridItem.w + headerColW * index
-    const _columnHeader = this.columnHeader.map((item, index) => ({ ...item, 'i': item.id, 'x': headerColX(index), 'y': 1, 'w': headerColW, 'h': 2 }))
-    _columnHeader[this.columnHeader.length - 1].w += this.totalCol % this.columnHeader.length;
-    this.columnHeader = _columnHeader
+    {//calculate ColHeader Grid
 
-    const headerRowH = 10
-    const headerRowy = (index) => this.blankGridItem.h + headerRowH * index
-    const _rowHeader = this.rowHeader.map((item, index) => ({ ...item, 'i': item.id, 'x': 1, 'y': headerRowy(index), 'w': 2, 'h': headerRowH }))
-    this.rowHeader = _rowHeader
+      const colYPosition = 1;
+      let colXPosition = this.blankGridItem.w;
+      this.columnHeader = this.columnHeader.map((col) => {
+        let totalColWidth = 0;
+        this.mockApiData.forEach((data) => {
+          if (data.column.includes(col.id)) {
+            totalColWidth += this.gridPadding + this.defaultGridItem.w
+          }
+        })
+
+        if (!totalColWidth) {
+          totalColWidth = this.gridPadding + this.defaultGridItem.w
+        }
+
+        const tempColHeader = {
+          x: colXPosition,
+          y: colYPosition,
+          w: totalColWidth + this.gridPadding,
+          h: this.blankGridItem.h - this.parentColHeader.h,
+          i: col.id,
+          ...col
+        }
+        colXPosition += tempColHeader.w
+        return tempColHeader
+      })
+      this.totalCol = this.getTotalCol
+    }
+
+    { //calculate RowHeader Grid
+
+      const colXPosition = 1;
+      let colYPosition = this.blankGridItem.h;
+      this.rowHeader = this.rowHeader.map((row) => {
+        let totalColHeight = 0;
+
+        if (!totalColHeight) {
+          totalColHeight = this.gridPadding + this.defaultGridItem.h
+        }
+
+        const tempRowHeader = {
+          x: colXPosition,
+          y: colYPosition,
+          w: this.blankGridItem.w - this.parentRowHeader.w,
+          h: totalColHeight + this.gridPadding,
+          i: row.id,
+          ...row
+        }
+        colYPosition += tempRowHeader.h
+        return tempRowHeader
+      })
+    }
+
+    {// calculate grid data
+
+      const hashMapColStacks = {}
+      for (const element of this.columnHeader) {
+        hashMapColStacks[element.id] = [];
+      }
+
+      const hashMapRowStacks = {}
+      for (const element of this.rowHeader) {
+        hashMapRowStacks[element.id] = [];
+      }
+      this.data = this.mockApiData.map((data) => {
+        let colXPosition = this.columnHeader.find((col) => col.id === data.column[0]).x + this.gridPadding
+        if (hashMapColStacks[data.column[0]].length) {
+          hashMapColStacks[data.column[0]].push(data.id)
+          colXPosition += (this.defaultGridItem.w + this.gridPadding)
+        } else {
+          hashMapColStacks[data.column[0]].push(data.id)
+        }
+
+        let colYPosition = this.rowHeader.find((row) => row.id === data.row[0]).y + this.gridPadding
+        hashMapRowStacks[data.row[0]].push(data.id)
+        // if (hashMapRowStacks[data.row[0]].length) {
+        //   hashMapRowStacks[data.row[0]].push(data.id)
+        //   colYPosition += (this.defaultGridItem.h + gridPadding)
+        // } else {
+        //   hashMapRowStacks[data.row[0]].push(data.id)
+        // }
+
+        const tempData = {
+          x: colXPosition,
+          y: colYPosition,
+          w: this.defaultGridItem.w,
+          h: this.defaultGridItem.h,
+          i: data.id,
+          ...data
+        }
+        return tempData
+      })
+    }
   },
   computed: {
     getLayout() {
@@ -254,7 +342,6 @@ export default {
   cursor: url(../assets/img/ColResize.svg) 4 12, auto;
 }
 
-
 ::v-deep.row-header .vue-resizable-handle {
   cursor: url(../assets/img/RowResize.svg) 4 12, auto;
 }
@@ -267,65 +354,18 @@ export default {
   cursor: col-resize !important;
 }
 
-.card-header {
-  background-color: #007BC3;
-  color: #FFFFFF;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-top-left-radius: 6px;
-  border-top-right-radius: 6px;
-  padding: 12.5px 8px;
-  font-size: 12px;
+::v-deep.column-header.resizing {
+  cursor: url(../assets/img/ColResize.svg) 4 12, auto !important;
 }
 
-.body-item {
-  display: flex;
-  flex-direction: row;
-  padding: 8px 16px;
-  justify-content: space-between;
+::v-deep.row-header.resizing {
+  cursor: url(../assets/img/RowResize.svg) 4 12, auto !important;
 }
 
-.card-body {
-  flex: 1;
-  border-left: 1px solid #DCDCDC;
-  border-right: 1px solid #DCDCDC;
-}
-
-.mark-sub-context {
-  display: flex;
-  width: 83px;
-  justify-content: space-between;
-  font-size: 10px;
-  color: #666666;
-
-}
-
-.card-footer {
-  display: flex;
-  justify-content: flex-end;
-  align-items: baseline;
-  padding-right: 16px;
-  padding-bottom: 5px;
-  padding-top: 8px;
-  border: 1px solid #DCDCDC;
-  border-end-start-radius: 6px;
-  border-end-end-radius: 6px;
-}
-
-
-.footer-sub-title {
-  font-size: 10px;
-}
-
-.header-title {}
 
 .card-container {
   border: none !important;
   background-color: #F8F8F8 !important;
-  display: flex;
-  flex-direction: column;
-  border-radius: 6px;
 }
 
 .grid-blank ::after {
@@ -348,11 +388,6 @@ export default {
   background: #EDEDED;
   border: 1px solid #DCDCDC;
   align-content: center;
-}
-
-.card-container {
-  touch-action: none;
-  box-sizing: border-box;
 }
 
 .vue-grid-item .resizing {
@@ -393,25 +428,6 @@ export default {
   left: 0px;
   bottom: 0px;
 
-}
-
-.vue-grid-item .text {
-  font-size: 16px;
-  display: flex;
-  margin: 4px;
-}
-
-.vue-grid-item .no-drag {
-  height: 100%;
-  width: 100%;
-}
-
-.vue-grid-item .minMax {
-  font-size: 12px;
-}
-
-.vue-grid-item .add {
-  cursor: pointer;
 }
 
 .vue-draggable-handle {
