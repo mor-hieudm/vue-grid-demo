@@ -143,7 +143,6 @@ export default {
   },
   created() {
     {//calculate ColHeader Grid
-
       const colYPosition = 1;
       let colXPosition = this.blankGridItem.w;
       this.columnHeader = this.columnHeader.map((col) => {
@@ -174,8 +173,8 @@ export default {
 
     { //calculate RowHeader Grid
 
-      const colXPosition = 1;
-      let colYPosition = this.blankGridItem.h;
+      const rowXPosition = 1;
+      let rowYPosition = this.blankGridItem.h;
       this.rowHeader = this.rowHeader.map((row) => {
         let totalColHeight = 0;
 
@@ -184,14 +183,14 @@ export default {
         }
 
         const tempRowHeader = {
-          x: colXPosition,
-          y: colYPosition,
+          x: rowXPosition,
+          y: rowYPosition,
           w: this.blankGridItem.w - this.parentRowHeader.w,
           h: totalColHeight + this.gridPadding,
           i: row.id,
           ...row
         }
-        colYPosition += tempRowHeader.h
+        rowYPosition += tempRowHeader.h
         return tempRowHeader
       })
     }
@@ -350,8 +349,8 @@ export default {
   background: none !important;
 }
 
-::v-deep .cursor-change .vue-grid-item {
-  cursor: col-resize !important;
+::v-deep .vue-grid-item {
+  align-content: center;
 }
 
 ::v-deep.column-header.resizing {
@@ -387,7 +386,6 @@ export default {
 .vue-grid-item:not(.vue-grid-placeholder) {
   background: #EDEDED;
   border: 1px solid #DCDCDC;
-  align-content: center;
 }
 
 .vue-grid-item .resizing {
