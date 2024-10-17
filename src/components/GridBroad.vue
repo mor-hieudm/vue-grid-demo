@@ -350,7 +350,7 @@ export default {
 
 ::v-deep .vue-resizable-handle {
   background: none !important;
-  height: 100%;
+  height: 100% !important;
 }
 
 ::v-deep.column-header.resizing {
