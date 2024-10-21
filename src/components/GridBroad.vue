@@ -24,13 +24,13 @@
 
       <grid-item class="column-header" v-for="item in columnHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
         :maxH="2" :minH="2" :i="item.i" :isResizable="true" :isDraggable="false"
-        :style="{ '--borderHeight': getGridBorderHeight }" @resize="columnHeaderResizeEvent" @resized="calculateData">
+        :style="{ '--borderHeight': getGridBorderHeight }" @resize="columnHeaderResizeEvent" @resized="columnHeaderResizedEvent">
         <div>{{ item.element.label }}</div>
       </grid-item>
 
       <grid-item class="row-header" v-for="item in rowHeader" :x="item.x" :y="item.y" :w="item.w" :h="item.h" :minW="2"
         :maxW="2" :i="item.i" :isResizable="true" :isDraggable="false" @resize="rowHeaderResizeEvent"
-        @resized="calculateData" :style="{ '--borderWidth': getGridBorderWidth }">
+        @resized="rowHeaderResizedEvent" :style="{ '--borderWidth': getGridBorderWidth }">
         <div class="row-header-text">{{ item.element.label }}</div>
       </grid-item>
 
@@ -68,12 +68,14 @@ export default {
         { id: 5, element: { label: 'PM', gridChildIds: [] } },
         { id: 6, element: { label: '構築・プロビ', gridChildIds: [] } },
       ],
+      oldColumnHeader: [],
 
       rowHeader: [
         { id: 7, element: { label: '探索領域', gridChildIds: [] }, },
         { id: 8, element: { label: 'モビリティ', gridChildIds: [] }, },
         { id: 9, element: { label: '物流', gridChildIds: [] }, },
       ],
+      oldRowHeader: [],
 
       data: [],
 
@@ -168,6 +170,7 @@ export default {
       colXPosition += tempColHeader.w
       return tempColHeader
     })
+    this.oldColumnHeader = JSON.parse(JSON.stringify(this.columnHeader))
     this.totalCol = this.getTotalCol
 
 
@@ -193,6 +196,7 @@ export default {
       rowYPosition += tempRowHeader.h
       return tempRowHeader
     })
+    this.oldRowHeader = JSON.parse(JSON.stringify(this.rowHeader))
 
     // calculate grid data
     const hashMapColStacks = {}
@@ -232,6 +236,7 @@ export default {
       }
       return tempData
     })
+    this.mockApiData = JSON.parse(JSON.stringify(this.data))
 
   },
   computed: {
@@ -277,7 +282,6 @@ export default {
           resizeElement = true
         }
       });
-
       if (resizeElement && this.totalCol <= this.getTotalCol) {
         this.totalCol -= amountOfGridChange
       }
@@ -295,7 +299,32 @@ export default {
         }
       });
     },
-    calculateData() {
+    columnHeaderResizedEvent(i, newH, newW) {
+      let currentHeader = JSON.parse(JSON.stringify(this.columnHeader.find(header => header.i === i)))
+      let nextHeader = JSON.parse(JSON.stringify(this.columnHeader.find(data => data.x === currentHeader.x + newW)))
+      let oldCurrentHeader = this.oldColumnHeader.find(header => header.i === i)
+      this.data = this.data.map(data => {
+        if(data.column.includes(currentHeader.i) && data.column.includes(nextHeader.i)) {
+          data.w = data.w + currentHeader.w - oldCurrentHeader.w < 6 ? 6 : data.w + currentHeader.w - oldCurrentHeader.w
+        }
+        return data
+      })
+      this.oldColumnHeader = JSON.parse(JSON.stringify(this.columnHeader))
+      this.data.map(data => {
+        this.dataResizeEvent(data.i)
+      })
+    },
+    rowHeaderResizedEvent(i, newH, newW) {
+      let currentRow = JSON.parse(JSON.stringify(this.rowHeader.find(header => header.i === i)))
+      let nextRow = JSON.parse(JSON.stringify(this.rowHeader.find(data => data.y === currentRow.y + newH)))
+      let oldCurrentRow = this.oldRowHeader.find(header => header.i === i)
+      this.data = this.data.map(data => {
+        if(data.row.includes(currentRow.i) && data.row.includes(nextRow.i)) {
+          data.h = data.h + currentRow.h - oldCurrentRow.h < 10 ? 10 : data.h + currentRow.h - oldCurrentRow.h
+        }
+        return data
+      })
+      this.oldColumnHeader = JSON.parse(JSON.stringify(this.columnHeader))
       this.data.map(data => {
         this.dataResizeEvent(data.i)
       })
