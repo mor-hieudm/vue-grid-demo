@@ -307,6 +307,9 @@ export default {
         if(data.column.includes(currentHeader.i) && data.column.includes(nextHeader.i)) {
           data.w = data.w + currentHeader.w - oldCurrentHeader.w < 6 ? 6 : data.w + currentHeader.w - oldCurrentHeader.w
         }
+        if(!data.column.includes(currentHeader.i) && data.column.includes(nextHeader.i)) {
+          data.x = data.x + currentHeader.w - oldCurrentHeader.w
+        }
         return data
       })
       this.oldColumnHeader = JSON.parse(JSON.stringify(this.columnHeader))
@@ -321,6 +324,9 @@ export default {
       this.data = this.data.map(data => {
         if(data.row.includes(currentRow.i) && data.row.includes(nextRow.i)) {
           data.h = data.h + currentRow.h - oldCurrentRow.h < 10 ? 10 : data.h + currentRow.h - oldCurrentRow.h
+        }
+        if(!data.row.includes(currentRow.i) && data.row.includes(nextRow.i)) {
+          data.y = data.y + currentRow.h - oldCurrentRow.h
         }
         return data
       })
